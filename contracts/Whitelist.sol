@@ -6,7 +6,6 @@ contract Whitelist {
     uint8 public maxWhitelistedAddresses;
     mapping(address => bool) public whitelistedAddresses;
     uint8 public numAddressesWhitelisted;
-    event Whitelisted(address whitelistedAddress);
 
     constructor(uint8 _maxWhitelistedAddresses) {
         maxWhitelistedAddresses = _maxWhitelistedAddresses;
@@ -22,7 +21,6 @@ contract Whitelist {
             "More addresses cant be added, limit reached"
         );
         whitelistedAddresses[msg.sender] = true;
-        emit Whitelisted(msg.sender);
         numAddressesWhitelisted += 1;
     }
 }

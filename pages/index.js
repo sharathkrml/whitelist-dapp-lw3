@@ -74,17 +74,6 @@ export default function Home() {
       console.log(error);
     }
   };
-  const setupEventListener = async () => {
-    const signer = await getProviderOrSigner(true);
-    const whitelistContract = new Contract(
-      WHITELIST_CONTRACT_ADDRESS,
-      WHITELISTABI.abi,
-      signer
-    );
-    whitelistContract.on("Whitelisted", (...args) => {
-      console.log(args);
-    });
-  };
 
   const connectWallet = async () => {
     try {
@@ -145,6 +134,7 @@ export default function Home() {
           <div className={styles.description}>
             {numberOfWhitelisted} have already joined the Whitelist
           </div>
+
           {renderButton()}
         </div>
         <div>
