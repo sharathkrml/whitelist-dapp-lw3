@@ -3,8 +3,8 @@ import styles from "../styles/Home.module.css";
 import Web3Modal from "web3modal";
 import { useState, useEffect, useRef } from "react";
 import { Contract, providers } from "ethers";
-import { WHITELIST_CONTRACT_ADDRESS } from "../constants";
-import WHITELISTABI from "../artifacts/contracts/Whitelist.sol/Whitelist.json";
+import { WHITELIST_CONTRACT_ADDRESS,WHITELISTABI } from "../constants";
+// import WHITELISTABI from "../artifacts/contracts/Whitelist.sol/Whitelist.json";
 
 export default function Home() {
   const [walletConnected, setWalletConnected] = useState(false);
@@ -16,6 +16,12 @@ export default function Home() {
   const getProviderOrSigner = async (needSigner = false) => {
     const connection = await web3ModalRef.current.connect();
     const provider = new providers.Web3Provider(connection);
+
+    const { chainId } = await provider.getNetwork();
+    if (chainId !== 4) {
+      window.alert("Change the network to Rinkeby");
+      throw new Error("Change network to Rinkeby");
+    }
     if (needSigner) {
       const signer = provider.getSigner();
       return signer;
@@ -27,7 +33,7 @@ export default function Home() {
       const provider = await getProviderOrSigner();
       const whitelistContract = new Contract(
         WHITELIST_CONTRACT_ADDRESS,
-        WHITELISTABI.abi,
+        WHITELISTABI,
         provider
       );
       // call the numAddressesWhitelisted from the contract
@@ -45,7 +51,7 @@ export default function Home() {
       const address = await signer.getAddress();
       const whitelistContract = new Contract(
         WHITELIST_CONTRACT_ADDRESS,
-        WHITELISTABI.abi,
+        WHITELISTABI,
         signer
       );
       const _whiteListed = await whitelistContract.whitelistedAddresses(
@@ -61,7 +67,7 @@ export default function Home() {
       const signer = await getProviderOrSigner(true);
       const whitelistContract = new Contract(
         WHITELIST_CONTRACT_ADDRESS,
-        WHITELISTABI.abi,
+        WHITELISTABI,
         signer
       );
       const txn = await whitelistContract.addAddressToWhitelist();
@@ -87,19 +93,14 @@ export default function Home() {
   };
   useEffect(() => {
     if (!walletConnected) {
-      web3ModalRef.current = new Web3Modal();
+      web3ModalRef.current = new Web3Modal({
+        network: "rinkeby",
+        providerOptions: {},
+        disableInjectedProvider: false,
+      });
+      connectWallet();
     }
   }, [walletConnected]);
-
-  useEffect(async() => {
-    const provider = new providers.JsonRpcProvider();
-    const whitelistContract = new Contract(
-      WHITELIST_CONTRACT_ADDRESS,
-      WHITELISTABI.abi,
-      provider
-    );
-    setNumberOfWhitelisted(await whitelistContract.numAddressesWhitelisted());
-  }, []);
 
   const renderButton = () => {
     if (walletConnected) {
