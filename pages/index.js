@@ -81,7 +81,6 @@ export default function Home() {
       setWalletConnected(true);
       checkIfAddressInWhitelist();
       getNumberOfWhitelisted();
-      setupEventListener();
     } catch (error) {
       console.log(error);
     }
@@ -89,9 +88,18 @@ export default function Home() {
   useEffect(() => {
     if (!walletConnected) {
       web3ModalRef.current = new Web3Modal();
-      connectWallet();
     }
   }, [walletConnected]);
+
+  useEffect(async() => {
+    const provider = new providers.JsonRpcProvider();
+    const whitelistContract = new Contract(
+      WHITELIST_CONTRACT_ADDRESS,
+      WHITELISTABI.abi,
+      provider
+    );
+    setNumberOfWhitelisted(await whitelistContract.numAddressesWhitelisted());
+  }, []);
 
   const renderButton = () => {
     if (walletConnected) {
